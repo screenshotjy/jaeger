@@ -19,20 +19,7 @@ to view the traces. A tutorial / walkthough is available:
 
 ## Running
 
-### Run Jaeger Backend
-
-An all-in-one Jaeger backend is packaged as a Docker container with in-memory storage.
-
-```bash
-docker run \
-  --rm \
-  --name jaeger \
-  -p6831:6831/udp \
-  -p16686:16686 \
-  jaegertracing/all-in-one:1.6
-```
-
-Jaeger UI can be accessed at http://localhost:16686.
+### Run SignalFx Gateway and have it listen on http://localhost:9080/v1/trace
 
 ### Run HotROD from source
 
@@ -48,10 +35,8 @@ go run ./main.go all
 ```bash
 docker run \
   --rm \
-  --link jaeger \
-  --env JAEGER_AGENT_HOST=jaeger \
-  --env JAEGER_AGENT_PORT=6831 \
-  -p8080-8083:8080-8083 \
+  --env JAEGER_ENDPOINT=http://localhost:9080/v1/trace \
+  --network host \
   jaegertracing/example-hotrod:latest \
   all
 ```
