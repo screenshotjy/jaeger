@@ -18,6 +18,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 	"math/rand"
 	"sync"
 
@@ -28,7 +29,7 @@ import (
 
 	"github.com/jaegertracing/jaeger/examples/hotrod/pkg/delay"
 	"github.com/jaegertracing/jaeger/examples/hotrod/pkg/log"
-	"github.com/jaegertracing/jaeger/examples/hotrod/pkg/tracing"
+	//"github.com/jaegertracing/jaeger/examples/hotrod/pkg/tracing"
 	"github.com/jaegertracing/jaeger/examples/hotrod/services/config"
 )
 
@@ -39,9 +40,10 @@ type Redis struct {
 	errorSimulator
 }
 
-func newRedis(metricsFactory metrics.Factory, logger log.Factory) *Redis {
+func newRedis(tracer opentracing.Tracer, metricsFactory metrics.Factory, logger log.Factory) *Redis {
 	return &Redis{
-		tracer: tracing.Init("redis", metricsFactory, logger),
+		//tracer: tracing.Init("redis", metricsFactory, logger),
+		tracer: tracer,
 		logger: logger,
 	}
 }
@@ -72,6 +74,8 @@ func (r *Redis) GetDriver(ctx context.Context, driverID string) (Driver, error) 
 	if span := opentracing.SpanFromContext(ctx); span != nil {
 		span := r.tracer.StartSpan("GetDriver", opentracing.ChildOf(span.Context()))
 		span.SetTag("param.driverID", driverID)
+		span.SetTag("db.instance","prod-redis1")
+		span.SetTag("db.type","redis")
 		ext.SpanKindRPCClient.Set(span)
 		defer span.Finish()
 		ctx = opentracing.ContextWithSpan(ctx, span)
@@ -97,17 +101,27 @@ var errTimeout = errors.New("redis timeout")
 
 type errorSimulator struct {
 	sync.Mutex
-	countTillError int
+	//countTillError int
+	randError int
 }
 
 func (es *errorSimulator) checkError() error {
 	es.Lock()
-	es.countTillError--
+	/*es.countTillError--
 	if es.countTillError > 0 {
 		es.Unlock()
 		return nil
 	}
 	es.countTillError = 5
+	es.Unlock()
+	*/
+	s1 := rand.NewSource(time.Now().UnixNano())
+	randError := rand.New(s1)
+	// Add 2% chance of error instead of injecting it every 5th time
+	if randError.Intn(100) < 98 {
+		es.Unlock()
+		return nil
+	}
 	es.Unlock()
 	delay.Sleep(2*config.RedisGetDelay, 0) // add more delay for "timeout"
 	return errTimeout

@@ -52,7 +52,7 @@ func NewServer(hostPort string, tracer opentracing.Tracer, metricsFactory metric
 		logger:   logger,
 		ch:       ch,
 		server:   server,
-		redis:    newRedis(metricsFactory, logger),
+		redis:    newRedis(tracer,metricsFactory, logger),
 	}
 }
 

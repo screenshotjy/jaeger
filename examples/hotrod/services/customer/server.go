@@ -42,7 +42,8 @@ func NewServer(hostPort string, tracer opentracing.Tracer, metricsFactory metric
 		tracer:   tracer,
 		logger:   logger,
 		database: newDatabase(
-			tracing.Init("mysql", metricsFactory, logger),
+			//tracing.Init("mysql", metricsFactory, logger),
+			tracer,
 			logger.With(zap.String("component", "mysql")),
 		),
 	}
