@@ -24,8 +24,8 @@ to view the traces. A tutorial / walkthough is available:
 ### Run HotROD from source
 
 ```bash
-go get github.com/jaegertracing/jaeger
-cd $GOPATH/src/github.com/jaegertracing/jaeger
+go get github.com/harnitsignalfx/jaeger
+cd $GOPATH/src/github.com/harnitsignalfx/jaeger
 make install
 cd examples/hotrod
 go run ./main.go all
@@ -37,7 +37,7 @@ docker run \
   --rm \
   --env JAEGER_ENDPOINT=http://localhost:9080/v1/trace \
   --network host \
-  jaegertracing/example-hotrod:latest \
+  harnit/sfx_hotrod:latest \
   all
 ```
 
